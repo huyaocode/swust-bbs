@@ -1,23 +1,23 @@
 <template>
   <ul>
     <li
-      v-for="item in data"
-      :key="item.id"
+      v-for="(item, index) in data"
+      :key="index"
       class="infinite-list-item"
     >
       <el-card class="box-card">
-        <router-link to="/">
-          <div class="img">
+        <router-link :to="'/detail/' + item.id">
+          <div class="img" v-if="item.picture">
             <el-image
               style="width: 100px; height: 100px"
-              :src="'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'"
+              :src="(item.picture).split('----')[0]"
               :fit="'contain'"
             >
             </el-image>
           </div>
         </router-link>
         <div class="content">
-          <router-link to="/">
+          <router-link :to="'/detail/' + item.id">
             <h3>{{item.title }}</h3>
           </router-link>
           <p>
@@ -41,14 +41,13 @@ export default {
 <style scoped>
 li {
   list-style: none;
-  margin: 20px 50px;
+  margin: 20px auto;
 }
 .img {
   float: left;
+  margin-right: 15px;
 }
-.content {
-  margin-left: 120px;
-}
+
 .box-card {
   padding-bottom: 10px;
 }

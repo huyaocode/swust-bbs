@@ -18,30 +18,34 @@ export default [
       },
       {
         path: 'resource',
-        component: Resource
+        component: Resource,
+        children: [
+          {
+            path: 'me',
+            component: Resource
+          }
+        ]
       },
       {
         path: 'require',
-        component: Require
+        component: Require,
+        children: [
+          {
+            path: 'me',
+            component: Require
+          }
+        ]
       },
       {
-        path: 'myresource',
-        component: Resource
-      },
-      {
-        path: 'myrequire',
-        component: Require
-      },
-      {
-        path: '/login',
+        path: 'login',
         component: Login
       },
       {
-        path: '/register',
+        path: 'register',
         component: Register
       },
       {
-        path: 'me',
+        path: 'me/:id',
         component: Mypage
       },
       {

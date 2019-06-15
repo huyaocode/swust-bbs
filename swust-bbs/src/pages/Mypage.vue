@@ -1,13 +1,12 @@
 import axios from 'axios';
 <template>
-  <div class="page">
+  <div :class="{ page: !editable, 'edit-page': editable }">
     <el-form
       :model="userInfo"
       ref="loginForm"
       label-width="100px"
-      class="form"
     >
-      <el-form-item >
+      <el-form-item>
         <el-image
           style="width: 60px; height: 60px;"
           :src="userInfo.headImgUrl"
@@ -21,23 +20,58 @@ import axios from 'axios';
       </el-form-item>
 
       <el-form-item label="昵称：">
-        {{userInfo.nickname}}
+        <span v-if="!editable">{{userInfo.nickname}}</span>
+        <el-input
+          v-else
+          v-model="userInfo.nickname"
+          placeholder="昵称"
+        ></el-input>
       </el-form-item>
 
       <el-form-item label="手机号：">
-        {{userInfo.telephone}}
+        <span v-if="!editable">{{userInfo.telephone}}</span>
+        <el-input
+          v-else
+          v-model="userInfo.telephone"
+          placeholder="手机号"
+        ></el-input>
       </el-form-item>
 
       <el-form-item label="性别：">
-        {{userInfo.sex}}
+        <span v-if="!editable">{{userInfo.sex}}</span>
+        <el-input
+          v-else
+          v-model="userInfo.sex"
+          placeholder="性别"
+        ></el-input>
       </el-form-item>
 
-      <el-form-item label="专业：">
-        {{userInfo.profession}}
+      <el-form-item label="学院：">
+        <span v-if="!editable">{{userInfo.profession}}</span>
+        <el-input
+          v-else
+          v-model="userInfo.profession"
+          placeholder="学院"
+        ></el-input>
       </el-form-item>
 
       <el-form-item label="班级：">
-        {{userInfo.classes}}
+        <span v-if="!editable">{{userInfo.classes}}</span>
+        <el-input
+          v-else
+          v-model="userInfo.classes"
+          placeholder="班级"
+        ></el-input>
+      </el-form-item>
+
+      <el-form-item>
+        <el-button
+          v-if="editable"
+          style="width:135%; margin-left: -100px; margin-top:20px;"
+          type="primary"
+          @click="submitForm()"
+          :loading="waitResponse"
+        >更新</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -50,27 +84,59 @@ export default {
   data () {
     return {
       editable: false,
-      userInfo: {}
+      waitResponse: false,
+      userInfo: {
+        headImgUrl: '',
+        nickname: '',
+        telephone: '',
+        sex: '',
+        profession: '',
+        classes: ''
+      }
     }
   },
   mounted () {
-    axios.put('/api/user/get', {
-      headers: {
-        token: localStorage.getItem('token')
-      },
-    }).then(res => {
-      this.userInfo = res.data.data;
-      console.log('用户信息', res.data.data)
-      const {id, username} = res.data.data;
-      const localId = localStorage.getItem('userId')
-      const localUsername = localStorage.getItem('username')
-      // if(id === localId && username === localUsername) {
+    const id = this.$route.params.id;
+    // 获取用户信息
+    this.getUserInfo(id);
+    if (id === localStorage.getItem('userId')) {
+      this.editable = true;
+    }
+  },
+  methods: {
+    getUserInfo (id) {
+      axios.put('/api/user/getUserInfo', {
+        id: id
+      }).then(res => {
+        if (res.data.data) {
+          this.userInfo = res.data.data;
+          console.log('用户信息', res.data.data)
+        } else {
+          this.$message.error('请登录')
+          this.$router.push('/login')
+        }
+      }).catch(err => {
+        console.log('error', err)
+      })
+    },
+    // 更新
+    submitForm () {
+      this.waitResponse = true
+      axios.put('/api/user/edit', {
+        ...this.userInfo
+      }, {
+          headers: {
+            token: localStorage.getItem('token')
+          }
+        }).then(res => {
+          console.log('更新结果', res.data)
+          this.waitResponse = false
+        }).catch(err => {
+          console.log('error', err)
+          this.$message.error('更新信息失败')
+        })
 
-      // }
-    }).catch(err => {
-      console.log('error', err)
-      this.$message.error('获取信息失败')
-    })
+    }
   }
 }
 
@@ -82,5 +148,11 @@ export default {
   margin: 20px auto;
   border: 1px solid #efefef;
   padding: 20px 10px 20px 150px;
+}
+.edit-page {
+  width: 400px;
+  margin: 20px auto;
+  border: 1px solid #efefef;
+  padding: 20px 20px 20px 10px;
 }
 </style>

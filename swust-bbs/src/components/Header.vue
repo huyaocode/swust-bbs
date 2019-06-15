@@ -12,14 +12,14 @@
         @select="handleSelect"
       >
         <el-menu-item index="1">
-          <router-link to="/resource">找资源</router-link>
+          <router-link to="/resource">资源</router-link>
         </el-menu-item>
         <el-menu-item index="2">
-          <router-link to="/require">找需求</router-link>
+          <router-link to="/require">需求</router-link>
         </el-menu-item>
         <el-menu-item index="3">
           <router-link to="/add">
-            发帖子
+            <i class="el-icon-edit"></i>发帖子
           </router-link>
         </el-menu-item>
         <el-submenu
@@ -27,16 +27,16 @@
           class="right-menu-item"
         >
           <template slot="title"><i class="el-icon-user"></i></template>
-          <router-link to="/myresource">
+          <router-link to="/resource/me">
             <el-menu-item index="4-1">我的资源</el-menu-item>
           </router-link>
-          <router-link to="/myrequire">
+          <router-link to="/require/me">
             <el-menu-item index="4-2">我的需求</el-menu-item>
           </router-link>
           <router-link to="/star">
             <el-menu-item index="4-3">我的收藏</el-menu-item>
           </router-link>
-          <router-link to="/me">
+          <router-link :to="myPageUrl" >
             <el-menu-item index="4-4">关于我</el-menu-item>
           </router-link>
           <router-link to="/login">
@@ -53,7 +53,8 @@
 export default {
   name: 'Header',
   data: () => ({
-    activeIndex: localStorage.getItem('activeIndex')
+    activeIndex: localStorage.getItem('activeIndex'),
+    myPageUrl: `/me/${localStorage.getItem('userId')}`
   }),
   methods: {
     handleSelect (index) {

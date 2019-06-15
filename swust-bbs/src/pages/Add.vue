@@ -15,8 +15,8 @@
 
     <el-form-item prop="type">
       <el-radio-group v-model="form.type">
-        <el-radio label="resource">资源</el-radio>
-        <el-radio label="require">需求</el-radio>
+        <el-radio label="1">资源</el-radio>
+        <el-radio label="0">需求</el-radio>
       </el-radio-group>
     </el-form-item>
 
@@ -37,10 +37,12 @@
       autocomplete="off"
     >
       <el-upload
-        action="https://jsonplaceholder.typicode.com/posts/"
+        action="/api/information/uploadImg"
         list-type="picture-card"
         :on-preview="handlePictureCardPreview"
         :on-remove="handleRemove"
+        :headers="myHeaders"
+        :on-success="addPic"
       >
         <i class="el-icon-plus"></i>
       </el-upload>
@@ -72,6 +74,7 @@ import { setTimeout } from 'timers';
 
 export default {
   name: 'login',
+
   data () {
     var validator = (errMessage, checkData, vertifyMethod) => {
       return (rule, value, callback) => {
@@ -87,8 +90,10 @@ export default {
       form: {
         content: '',
         title: '',
-        type: ''
+        type: '',
       },
+      picList: [],
+      myHeaders: { token: localStorage.getItem('token') },
       dialogImageUrl: '',
       dialogVisible: false,
       waitResponse: false,
@@ -101,30 +106,48 @@ export default {
   },
   methods: {
     submitForm (formName) {
+      const date = new Date();
       this.$refs[formName].validate((valid) => {
         if (valid) {
           const data = {
             ...this.form
           }
-          data['time'] = {
-
+          data.userId = localStorage.getItem('userId')
+          data.categoryId = 1
+          if(this.picList.length > 0){
+            data.picture = this.picList.join('----')
           }
-          console.log('发布', data)
           this.waitResponse = true
-          setTimeout(() => {
-            this.waitResponse = false
-
-          }, 1000)
+          console.log('提交后台', data)
+          axios.post('/api/information/add',
+            data, {
+              headers: {
+                token: localStorage.getItem('token')
+              }
+            }
+          )
+          // 跳转到详情
+          .then(res => {
+                this.waitResponse = false;
+                this.$router.push({ path: '/detail/' + res.data.data.id})
+              }).catch(err => {
+                this.waitResponse = false;
+              }).catch(err => {
+                this.$message.error(err);
+                // this.$router.push({ path: '/login' })
+              })
         } else {
           console.log('error submit!!')
           return false;
         }
       });
     },
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
+    addPic (response, file, fileList) {
+      this.picList.push('http://localhost:8085/' + response.message);
     },
-    handlePictureCardPreview(file) {
+    handleRemove (file, fileList) {
+    },
+    handlePictureCardPreview (file) {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     }

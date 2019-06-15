@@ -86,30 +86,32 @@ export default {
           }).then(res => {
             const { code, message, data } = res.data;
             if (data) {
+              this.waitResponse = false
+              localStorage.setItem('userId', code)
               localStorage.setItem('isLogin', true);
               localStorage.setItem('token', data.token);
               localStorage.setItem('loginTime', data.loginTime);
-              axios.defaults.headers.common['token'] = data.token
-            } else {
-              this.$message.error(message);
-            }
-            return axios.put('/api/user/get', {
-              headers: {
-                token: localStorage.getItem('token')
-              }
-            })
-          }).then(res => {
-            // 获取用户信息（id）
-            this.waitResponse = false
-              console.log('信息', res.data)
-              this.userInfo = res.data.data;
-              const { id, username } = res.data.data;
-              const localId = localStorage.setItem('userId', id)
+              axios.defaults.headers.common['token'] = data.token;
+              axios.defaults.headers.common['Authorization'] = data.token;
+              // http request 拦截器
+              axios.interceptors.request.use(
+                config => {
+                  if (data.token) {  // 判断是否存在token，如果存在的话，则每个http header都加上token
+                    config.headers.token = `${data.token}`;
+                  }
+                  return config;
+                },
+                err => {
+                  return Promise.reject(err);
+                });
               this.$router.push({ path: '/' })
-            }).catch(err => {
-              console.log('error', err)
-              this.$message.error('获取信息失败')
-            })
+            } else {
+              this.$message.error(message)
+            }
+          }).catch(err => {
+            this.waitResponse = false
+            this.$message.error('获取信息失败')
+          })
         } else {
           return false;
         }

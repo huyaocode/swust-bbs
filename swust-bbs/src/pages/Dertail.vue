@@ -5,45 +5,56 @@
         <h2>{{title}}</h2>
         <table style="margin-top:10px;">
           <tr>
+            <td>时间： </td>
             <td>{{time}}</td>
+          </tr>
+          <tr>
+            <td>类型：</td>
             <td>{{type}}</td>
-            <td>{{author}}</td>
-            <td>{{contact}}</td>
+          </tr>
+          <tr>
+            <td>发布人：</td>
+            <td>{{userNickName}}</td>
+          </tr>
+          <tr>
+            <td>联系方式：</td>
+            <td>{{telephone}}</td>
           </tr>
         </table>
       </div>
 
       <div class="head-img">
-        <el-image
-          style="width: 60px; height: 60px;"
-          :src="'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'"
-          :fit="'cover'"
-        >
-        </el-image>
-      </div>
-
-      <div class="content">
-        {{content}}
-      </div>
-
-      <div
-        class="imgs"
-        v-for="img in imgs"
-        :key="img"
-      >
-        <img
-          :src="img"
-          alt=""
-        >
+        <router-link :to="userPageUrl">
+          <el-image
+            style="width: 60px; height: 60px;"
+            :src="userHeadImg"
+            :fit="'cover'"
+          >
+          </el-image>
+        </router-link>
       </div>
     </div>
 
+    <div class="content">
+      {{content}}
+    </div>
+
+    <div
+      class="imgs"
+      v-for="img in imgs"
+      :key="img"
+    >
+      <img
+        :src="img"
+        alt=""
+      >
+    </div>
   </div>
 </template>
 
 <script>
 import Header from '../components/Header'
-import { constants } from 'crypto';
+import axios from 'axios'
 
 export default {
   name: 'detail',
@@ -52,17 +63,45 @@ export default {
   },
   data () {
     return {
-      title: '这是标题',
-      type: '类型',
-      contact: '18681693374',
-      author: '胡耀',
-      time: '2019-6-10',
-      content: '吉他很好很好听，吉他很好很好听，吉他很好很好听，吉他很好很好听，吉他很好很好听，吉他很好很好听，吉他很好很好听，吉他很好很好听，吉他很好很好听，吉他很好很好听，吉他很好很好听',
-      imgs: ['https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg?s=1',
-        'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg?s=2'
-        , 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg?s=3']
+      title: '',
+      userNickName: '',
+      time: '',
+      content: '',
+      type: '',
+      imgs: [],
+      userHeadImg: '',
+      telephone: '',
+      userPageUrl: ''
     }
-  }
+  },
+  mounted () {
+    const urlParamsId = this.$route.params.id;
+    if (urlParamsId) {
+      axios.put('api/information/get', { id: urlParamsId }).then(res => {
+        console.log(res.data.data)
+        const { userNickName, updateTime, title, picture, content, type, userId } = res.data.data;
+        this.userNickName = userNickName;
+        this.time = updateTime;
+        this.title = title;
+        this.type = type == 0 ? '需求' : '资源'
+        this.userId = userId;
+        if (picture) {
+          this.imgs = picture.split('----');
+        }
+        this.userPageUrl = '/me/' + userId;
+        console.log('pic', this.imgs)
+        this.content = content;
+
+        return axios.put('/api/user/getUserInfo', {
+          id: userId
+        })
+      }).then(res => {
+        const { headImgUrl, telephone } = res.data.data
+        this.userHeadImg = headImgUrl
+        this.telephone = telephone;
+      })
+    }
+  },
 }
 </script>
 
@@ -84,16 +123,16 @@ export default {
   width: 600px;
 }
 .content {
-  margin: 40px 0;
+  border-top: 1px solid #ececec;
+  padding-top: 25px;
+  margin: 130px 0;
 }
 
 img {
   max-width: 100%;
 }
 
-td{
-  padding-right: 15px;
-  line-height: 15px;
-  align-content: center;
+td {
+  padding: 5px 10px 0 0;
 }
 </style>
