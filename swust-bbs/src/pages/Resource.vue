@@ -56,9 +56,14 @@ export default {
     }
   },
   watch: {
-    '$route' () {
-      // 清空列表
-      this.data = null;
+    '$route' (to, from) {
+      console.log(to.path, from.path)
+      if (to.path === '/resource' && from.path === '/resource/me'
+        || to.path === '/resource/me' && from.path === '/resource'
+      ) {
+        // 清空列表
+        this.data = null;
+      }
       this.pageNum = 0;
       this.judgeUrl()
     }
@@ -103,7 +108,6 @@ export default {
       this.loadList()
     },
     loadList (config) {
-
       this.loading = true;
       const data = this.data;
       const sendData = {
@@ -119,8 +123,6 @@ export default {
         }
       }
 
-      console.log('sendData', sendData)
-
       axios.put('api/information/list', sendData).then(res => {
         if (res.data.data) {
           this.loading = false;
@@ -132,13 +134,13 @@ export default {
             this.data = this.data.concat(res.data.data.list)
           }
         } else {
-          // this.$message.error('请重新登录');
-          // this.$router.push('/login')
+          this.$message.error('请登录');
+          this.$router.push('/login')
         }
       }).catch(err => {
         this.loading = false;
-        //         this.$message.error('请重新登录');
-        // this.$router.push('/login')
+        this.$message.error('请登录');
+        this.$router.push('/login')
       })
     }
   }

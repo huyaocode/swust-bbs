@@ -4,8 +4,9 @@ import Register from './pages/Register'
 import Require from './pages/Require'
 import Resource from './pages/Resource'
 import Mypage from './pages/Mypage'
-import Add from './pages/Add'
+import Edit from './pages/Edit'
 import Detail from './pages/Dertail.vue'
+import Star from './pages/Star.vue'
 
 export default [
   {
@@ -50,11 +51,15 @@ export default [
       },
       {
         path: 'add',
-        component: Add
+        component: Edit
       },
       {
         path: 'detail/:id',
         component: Detail
+      },
+      {
+        path: 'star',
+        component: Star
       }
     ]
   }

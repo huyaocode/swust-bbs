@@ -40,7 +40,7 @@ import List from '../components/List'
 import axios from 'axios';
 
 export default {
-  name: 'resource',
+  name: 'require',
   components: {
     List
   },
@@ -56,9 +56,13 @@ export default {
     }
   },
   watch: {
-    '$route' () {
-      // 清空列表
-      this.data = null;
+    '$route' (to, from) {
+      if (to.path === '/require' && from.path === '/require/me'
+        || to.path === '/require/me' && from.path === '/require'
+      ) {
+        // 清空列表
+        this.data = null;
+      }
       this.pageNum = 0;
       this.judgeUrl()
     }
@@ -132,12 +136,12 @@ export default {
             this.data = this.data.concat(res.data.data.list)
           }
         } else {
-          this.$message.error('请重新登录');
+          this.$message.error('请登录');
           this.$router.push('/login')
         }
       }).catch(err => {
         this.loading = false;
-        this.$message.error('请重新登录');
+        this.$message.error('请登录');
         this.$router.push('/login')
       })
     }

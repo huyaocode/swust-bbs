@@ -129,7 +129,7 @@ export default {
             token: localStorage.getItem('token')
           }
         }).then(res => {
-          console.log('更新结果', res.data)
+          this.$message.success('更新信息成功')
           this.waitResponse = false
         }).catch(err => {
           console.log('error', err)
