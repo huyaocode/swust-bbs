@@ -16,7 +16,7 @@ import axios from 'axios';
         >
           <img
             v-if="userInfo.headImgUrl"
-            :src="'http://localhost:8085/' + userInfo.headImgUrl"
+            :src="(userInfo.headImgUrl.search('http')!== -1 ) ?  userInfo.headImgUrl : 'http://localhost:8085/' + userInfo.headImgUrl"
             class="avatar"
           >
           <i
