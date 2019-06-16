@@ -31,7 +31,7 @@
           <router-link :to="userPageUrl">
             <el-image
               style="width: 60px; height: 60px;"
-              :src="'http://localhost:8085/' + userHeadImg"
+              :src="(userHeadImg.search('http')!== -1 ) ?  userHeadImg : 'http://localhost:8085/' + userHeadImg"
               :fit="'cover'"
             >
             </el-image>
@@ -69,7 +69,6 @@
     <div style="clear: both;"></div>
     <div id="content">
     </div>
-
     <div
       class="imgs"
       v-for="img in imgs"
