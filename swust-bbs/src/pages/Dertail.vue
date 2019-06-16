@@ -13,6 +13,10 @@
             <td>{{type}}</td>
           </tr>
           <tr>
+            <td>分类：</td>
+            <td>{{categoryText}}</td>
+          </tr>
+          <tr>
             <td>发布人：</td>
             <td>{{userNickName}}</td>
           </tr>
@@ -27,7 +31,7 @@
           <router-link :to="userPageUrl">
             <el-image
               style="width: 60px; height: 60px;"
-              :src="userHeadImg"
+              :src="'http://localhost:8085/' + userHeadImg"
               :fit="'cover'"
             >
             </el-image>
@@ -102,7 +106,8 @@ export default {
       stared: false,
       infoId: null,
       editable: false,
-      starId: null
+      starId: null,
+      category: ''
     }
   },
   mounted () {
@@ -111,10 +116,25 @@ export default {
       // 获取文章信息
       this.loadPageData(urlParamsId);
     } else {
-      alert(0)
       this.$router.push('/')
     }
     this.isStared(urlParamsId);
+  },
+  computed: {
+    categoryText () {
+      let categoryList = null;
+      if (this.type === '需求') {
+        categoryList = JSON.parse(localStorage.getItem('requireCategory'))
+      } else {
+        categoryList = JSON.parse(localStorage.getItem('resourceCategory'))
+      }
+      
+      for(let i in categoryList) {
+        if(categoryList[i].id === parseInt(this.category)) {
+          return categoryList[i].name;
+        }
+      }
+    }
   },
   methods: {
     star () {
@@ -179,12 +199,13 @@ export default {
     },
     loadPageData (urlParamsId) {
       axios.put('api/information/get', { id: urlParamsId }).then(res => {
-        const { userNickName, updateTime, title, picture, content, type, userId, id } = res.data.data;
+        const { userNickName, updateTime, title, picture, content, type, userId, id, categoryId } = res.data.data;
         this.userNickName = userNickName;
         this.time = updateTime;
         this.title = title;
         this.type = (type == 0 ? '需求' : '资源')
         this.userId = userId
+        this.category = categoryId
         if (userId === parseInt(localStorage.getItem('userId'))) {
           this.editable = true
         }
@@ -194,7 +215,7 @@ export default {
         }
         this.userPageUrl = '/me/' + userId;
         // 换行符
-        this.content = content.replace(/\n/g,'<br />');
+        this.content = content.replace(/\n/g, '<br />');
         document.getElementById('content').innerHTML = this.content;
         // 获取作者信息
         return axios.put('/api/user/getUserInfo', {

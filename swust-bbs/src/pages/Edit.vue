@@ -19,7 +19,20 @@
         <el-radio label="0">需求</el-radio>
       </el-radio-group>
     </el-form-item>
-
+    <el-form-item prop="type">
+      <el-select
+        v-model="form.category"
+        placeholder="请选择类型"
+      >
+        <el-option
+          v-for="item in optionList"
+          :key="item.id"
+          :label="item.name"
+          :value="item.id"
+        >
+        </el-option>
+      </el-select>
+    </el-form-item>
     <el-form-item
       prop="content"
       autocomplete="off"
@@ -43,6 +56,7 @@
         :on-remove="handleRemove"
         :headers="myHeaders"
         :on-success="addPic"
+        :file-list="form.imgObjList"
       >
         <i class="el-icon-plus"></i>
       </el-upload>
@@ -61,7 +75,9 @@
         type="primary"
         @click="submitForm('addFrom')"
         :loading="waitResponse"
-      >发布</el-button>
+      >
+        {{editing ? '更新' : '发布'}}
+      </el-button>
     </el-form-item>
 
   </el-form>
@@ -74,7 +90,6 @@ import { setTimeout } from 'timers';
 
 export default {
   name: 'login',
-
   data () {
     var validator = (errMessage, checkData, vertifyMethod) => {
       return (rule, value, callback) => {
@@ -88,10 +103,14 @@ export default {
     }
     return {
       form: {
+        infoId: null,
         content: '',
         title: '',
         type: '',
+        category: '',
+        imgObjList: []
       },
+      editing: false,
       picList: [],
       myHeaders: { token: localStorage.getItem('token') },
       dialogImageUrl: '',
@@ -104,18 +123,42 @@ export default {
       }
     }
   },
+  computed: {
+    optionList () {
+      if (this.form.type === '1') {
+        return JSON.parse(localStorage.getItem('resourceCategory'))
+      } else if (this.form.type === '0') {
+        return JSON.parse(localStorage.getItem('requireCategory'))
+      }
+    }
+  },
+  mounted () {
+    // 编辑
+    if (this.$route.path.search('edit') !== -1) {
+      this.infoId = this.$route.params.id;
+      this.editing = true;
+      this.loadInfo();
+
+    }
+  },
   methods: {
     submitForm (formName) {
       const date = new Date();
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          const data = {
-            ...this.form
-          }
+          const data = {}
+          const { title, type, content, category } = this.form;
+          data.type = type;
+          data.title = title;
+          data.categoryId = category
+          data.content = content;
           data.userId = localStorage.getItem('userId')
-          data.categoryId = 1
-          if(this.picList.length > 0){
-            data.picture = this.picList.join('----')
+
+          if (this.form.imgObjList.length > 0) {
+            data.picture = ''
+            this.form.imgObjList.forEach(img => {
+              data.picture += img.url + '----'
+            });
           }
           this.waitResponse = true
           console.log('提交后台', data)
@@ -126,16 +169,16 @@ export default {
               }
             }
           )
-          // 跳转到详情
-          .then(res => {
-                this.waitResponse = false;
-                this.$router.push({ path: '/detail/' + res.data.data.id})
-              }).catch(err => {
-                this.waitResponse = false;
-              }).catch(err => {
-                this.$message.error(err);
-                // this.$router.push({ path: '/login' })
-              })
+            // 跳转到详情
+            .then(res => {
+              this.waitResponse = false;
+              this.$router.push({ path: '/detail/' + res.data.data.id })
+            }).catch(err => {
+              this.waitResponse = false;
+            }).catch(err => {
+              this.$message.error(err);
+              // this.$router.push({ path: '/login' })
+            })
         } else {
           console.log('error submit!!')
           return false;
@@ -143,13 +186,38 @@ export default {
       });
     },
     addPic (response, file, fileList) {
-      this.picList.push('http://localhost:8085/' + response.message);
+      this.form.imgObjList.push({
+        name: file.name,
+        url: 'http://localhost:8085/' + response.message
+      })
     },
     handleRemove (file, fileList) {
+      this.form.imgObjList = fileList
     },
     handlePictureCardPreview (file) {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
+    },
+    loadInfo () {
+      axios.put('api/information/get', { id: this.infoId }).then(res => {
+        const { title, picture, content, type } = res.data.data;
+        this.form.title = title
+        this.form.type = type
+        this.form.content = content
+        if (picture) {
+          const images = picture.split('----')
+          for (let i in images) {
+            if (images[i]) {
+              this.form.imgObjList.push({
+                name: '',
+                url: images[i]
+              })
+            }
+          }
+        }
+      }).catch(err => {
+        this.$message.error('出错了');
+      })
     }
   }
 }

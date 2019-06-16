@@ -54,6 +54,10 @@ export default [
         component: Edit
       },
       {
+        path: 'edit/:id',
+        component: Edit
+      },
+      {
         path: 'detail/:id',
         component: Detail
       },

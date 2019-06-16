@@ -104,6 +104,8 @@ export default {
                 err => {
                   return Promise.reject(err);
                 });
+              this.getCategory('1', 'resourceCategory')
+              this.getCategory('0', 'requireCategory')
               this.$router.push({ path: '/' })
             } else {
               this.$message.error(message)
@@ -116,6 +118,14 @@ export default {
           return false;
         }
       });
+    },
+    getCategory (type, name) {
+      axios.put('api/category/list', {
+        "type": type
+      }).then(res => {
+        localStorage.setItem(name, JSON.stringify(res.data.data.list))
+      })
+
     }
   }
 }

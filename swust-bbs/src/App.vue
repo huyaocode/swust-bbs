@@ -13,13 +13,20 @@
 </template>
 
 <script>
+import axios from 'axios'
 import Header from './components/Header'
 
 export default {
   name: 'app',
   components: {
     Header
-  }
+  },
+  mounted() {
+    
+  },
+  methods: {
+    
+  },
 }
 </script>
 
