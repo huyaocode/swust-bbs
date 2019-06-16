@@ -200,10 +200,11 @@ export default {
     },
     loadInfo () {
       axios.put('api/information/get', { id: this.infoId }).then(res => {
-        const { title, picture, content, type } = res.data.data;
+        const { title, picture, content, type,categoryId } = res.data.data;
         this.form.title = title
         this.form.type = type
         this.form.content = content
+        this.form.category = categoryId
         if (picture) {
           const images = picture.split('----')
           for (let i in images) {
