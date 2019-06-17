@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.team2.dao.cmt.CategoryDao">
+    <resultMap id="BaseResultMap" type="com.team2.pojo.cmt.Category">
+    <id column="id" property="id" jdbcType="INTEGER"/>
+    <result column="name" property="name" jdbcType="VARCHAR"/>
+    <result column="type" property="type" jdbcType="CHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    	id,name,type
+    </sql>
+    <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from cmt_category
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="delById" parameterType="java.lang.Long">
+        delete from cmt_category
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="save" parameterType="com.team2.pojo.cmt.Category" keyProperty="id" useGeneratedKeys="true">
+        insert into cmt_category ( name,type)
+        values (  #{name,jdbcType=VARCHAR}, #{type,jdbcType=CHAR})
+    </insert>
+
+    <update id="editById" parameterType="com.team2.pojo.cmt.Category">
+        update cmt_category set  
+         name = #{name,jdbcType=VARCHAR} ,
+         type = #{type,jdbcType=CHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <select id="list" resultMap="BaseResultMap" parameterType="com.team2.vo.cmt.CategoryQuery">
+        select
+        <include refid="Base_Column_List"/>
+        from cmt_category
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="type != null and type !=''">
+                and type like CONCAT('%',#{type} ,'%')
+            </if>
+        </trim>
+        order by id desc
+    </select>
+
+    <select id="pagelist" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from cmt_category limit  #{pageNum},#{pageSize};
+    </select>
+</mapper>

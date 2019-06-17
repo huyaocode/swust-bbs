@@ -1,0 +1,149 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<!–suppress ThymeleafVariablesResolveInspection –>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>举报审核</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <link th:href="@{~/css/font.css}"rel="stylesheet"/>
+    <link th:href="@{~/css/xadmin.css}"rel="stylesheet"/>
+    <script type="text/javascript" th:src="@{https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{~/lib/layui/layui.js}"></script>
+    <script type="text/javascript" th:src="@{~/js/xadmin.js}"></script>
+
+</head>
+<body class="layui-anim layui-anim-up">
+<div class="x-nav">
+          <span class="layui-breadcrumb">
+            <a href="">首页</a>
+            <a href="">举报管理</a>
+            <a>
+              <cite>举报列表</cite></a>
+          </span>
+</div>
+<div class="x-body">
+    <xblock>
+        <a class="layui-btn" href="javascript:location.replace(location.href);"><i class="layui-icon">ဂ</i>刷新</a>
+        <!--<button class="layui-btn" onclick="x_admin_show('添加用户','./member-add.html',600,400)"><i class="layui-icon"></i>添加</button>-->
+        <span class="x-right" style="line-height:40px" th:text="'共有数据：'+${reportList.total}+'条'"></span>
+    </xblock>
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>信息标题</th>
+            <th>举报者</th>
+            <th>举报时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="report,reportStat : ${reportList.list}">
+            <td><span th:text="${report.id}"></span></td>
+            <td><a th:value="${report.informationId}" class="info-detial" href="javascript:;" th:text="${infoList[reportStat.index].title}"></a></td>
+            <td><span th:id="'user'+${report.userId}" th:text="${infoList[reportStat.index].userNickName}"></span></td>
+            <td><span th:text="${report.memo}"></span></td>
+            <td class="td-manage" th:if="${report.status == '0'}">
+                <span class="layui-btn layui-btn-sm layui-btn-danger btn-ban"
+                      th:value="${report.id}">封禁</span>
+                <span class="layui-btn layui-btn-sm btn-ban"
+                      th:value="${report.id}">不封禁</span>
+            </td>
+            <td class="td-manage" th:if="${report.status == '1'}">
+                <span>已处理</span>
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
+    <div id="page">
+    </div>
+
+</div>
+<script th:inline="javascript">
+    layui.use('element', function(){
+        var element = layui.element;
+    });
+    layui.use('laypage', function() {
+        var laypage = layui.laypage;
+        //执行一个laypage实例
+        laypage.render({
+            elem: 'page' //分页容器的id
+            ,curr: [[${reportList.pageNum}]]
+            ,limit: [[${reportList.pageSize}]] //每页12条数据
+            ,count: [[${reportList.total}]]
+            ,skin: '#1E9FFF' //自定义选中色值
+            ,skip: true //开启跳页
+            ,jump: function(obj, first){
+                if(!first){
+                    location.href = "?page=" + obj.curr;
+                }
+            }
+        });
+    });
+
+    layui.use('layer', function(){
+        var layer = layui.layer;
+        $('.btn-ban').bind("click",function () {
+            var reportId = parseInt($(this).attr('value'));
+            var btn = $(this);
+            if($(this).text() == '封禁'){
+                layer.confirm('确定要封禁吗？', function (index) {
+                    layer.close(index);
+                    var loadFlag = layer.load(1,{shade:[0.3]});
+                    $.ajax({
+                        type: 'PUT',
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json", //预期服务器返回的数据类型
+                        url: "/report/setBanned", //url
+                        data: JSON.stringify({id:reportId,type:1}),
+                        success: function(result){
+                            layer.close(loadFlag);
+                            if(result.code == 0){
+                                location.replace(location.href);
+                            }else{
+                                layer.msg('操作失败');
+                            }
+                        },
+                        error: function () {
+                            layer.close(loadFlag);
+                        }
+                    });
+                });
+            }else{
+                layer.confirm('确定要不封禁吗？', function (index) {
+                    layer.close(index);
+                    var loadFlag = layer.load(1,{shade:[0.3]});
+                    $.ajax({
+                        type: 'PUT',
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json", //预期服务器返回的数据类型
+                        url: "/report/setBanned", //url
+                        data: JSON.stringify({id:reportId,type:0}),
+                        success: function(result){
+                            layer.close(loadFlag);
+                            if(result.code == 0){location.replace(location.href);
+                            }
+                        },
+                        error: function () {
+                            layer.msg('操作失败');
+                            layer.close(loadFlag);
+                        }
+                    });
+                });
+            }
+        });
+
+        $('.info-detial').bind("click",function () {
+           var infoId = $(this). attr('value');
+            x_admin_show('详情','/admin/infoDetial?id='+infoId,350,250);
+        });
+    });
+
+</script>
+</body>
+</html>

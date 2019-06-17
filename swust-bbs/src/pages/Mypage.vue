@@ -114,6 +114,16 @@ export default {
       this.editable = true;
     }
   },
+  watch: {
+    '$route' (to, from) {
+      const id = this.$route.params.id;
+      // 获取用户信息
+      this.getUserInfo(id);
+      if (id === localStorage.getItem('userId')) {
+        this.editable = true;
+      }
+    }
+  },
   methods: {
     getUserInfo (id) {
       axios.put('/api/user/getUserInfo', {

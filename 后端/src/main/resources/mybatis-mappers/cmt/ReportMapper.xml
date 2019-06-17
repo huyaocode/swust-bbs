@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.team2.dao.cmt.ReportDao">
+    <resultMap id="BaseResultMap" type="com.team2.pojo.cmt.Report">
+    <id column="id" property="id" jdbcType="INTEGER"/>
+    <result column="information_id" property="informationId" jdbcType="INTEGER"/>
+    <result column="user_id" property="userId" jdbcType="INTEGER"/>
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    <result column="memo" property="memo" jdbcType="VARCHAR"/>
+    <result column="status" property="status" jdbcType="CHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    	id,information_id,user_id,create_time,memo,status
+    </sql>
+    <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from cmt_report
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="delById" parameterType="java.lang.Long">
+        delete from cmt_report
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="save" parameterType="com.team2.pojo.cmt.Report" keyProperty="id" useGeneratedKeys="true">
+        insert into cmt_report ( information_id,user_id,memo,status)
+        values (#{informationId,jdbcType=INTEGER},#{userId,jdbcType=INTEGER},
+                #{memo,jdbcType=VARCHAR},#{status,jdbcType=CHAR})
+    </insert>
+
+    <update id="editById" parameterType="com.team2.pojo.cmt.Report">
+        update cmt_report set  
+         information_id = #{informationId,jdbcType=INTEGER} ,
+         user_id = #{userId,jdbcType=INTEGER} ,
+         memo = #{memo,jdbcType=VARCHAR} ,
+         status = #{status,jdbcType=CHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <select id="list" resultMap="BaseResultMap" parameterType="com.team2.vo.cmt.ReportQuery">
+        select
+        <include refid="Base_Column_List"/>
+        from cmt_report
+        <!--<trim prefix="where" prefixOverrides="and|or">-->
+        <!--<if test="status != null and status != ''">-->
+				<!--and status like CONCAT('%',#{status},'%')-->
+			<!--</if>-->
+        <!--</trim>-->
+        order by id desc
+    </select>
+
+    <select id="pagelist" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from cmt_report limit  #{pageNum},#{pageSize};
+    </select>
+</mapper>

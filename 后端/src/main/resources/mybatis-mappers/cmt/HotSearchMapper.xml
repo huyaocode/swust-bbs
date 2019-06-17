@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.team2.dao.cmt.HotSearchDao">
+    <resultMap id="BaseResultMap" type="com.team2.pojo.cmt.HotSearch">
+    <id column="id" property="id" jdbcType="INTEGER"/>
+    <result column="hot_word" property="hotWord" jdbcType="VARCHAR"/>
+    <result column="frequency" property="frequency" jdbcType="INTEGER"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    	id,hot_word,frequency
+    </sql>
+    <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from cmt_hot_search
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="delById" parameterType="java.lang.Long">
+        delete from cmt_hot_search
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="save" parameterType="com.team2.pojo.cmt.HotSearch" keyProperty="id" useGeneratedKeys="true">
+        insert into cmt_hot_search ( hot_word,frequency)
+        values (  #{hotWord,jdbcType=VARCHAR},#{frequency,jdbcType=INTEGER})
+    </insert>
+
+    <update id="editById" parameterType="com.team2.pojo.cmt.HotSearch">
+        update cmt_hot_search set  
+         hot_word = #{hotWord,jdbcType=VARCHAR} ,
+         frequency = #{frequency,jdbcType=INTEGER}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    
+     <select id="listByHotword" resultMap="BaseResultMap" parameterType="com.team2.vo.cmt.HotSearchQuery">
+        select
+        <include refid="Base_Column_List"/>
+        from cmt_hot_search h join cmt_infomation
+        <trim prefix="where" prefixOverrides="and|or">
+        </trim>
+        order by frequency desc
+    </select>
+
+    <select id="list" resultMap="BaseResultMap" parameterType="com.team2.vo.cmt.HotSearchQuery">
+        select
+        <include refid="Base_Column_List"/>
+        from cmt_hot_search
+        <trim prefix="where" prefixOverrides="and|or">
+        <if test="hotWord != null and hotWord !=''">
+			    and hot_word like CONCAT('%',#{hotWord} ,'%') 
+			</if>
+        </trim>
+        order by frequency desc
+    </select>
+
+    <select id="pagelist" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from cmt_hot_search limit  #{pageNum},#{pageSize};
+    </select>
+</mapper>

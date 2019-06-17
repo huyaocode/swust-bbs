@@ -1,0 +1,135 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<!–suppress ThymeleafVariablesResolveInspection –>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户列表</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <link th:href="@{~/css/font.css}"rel="stylesheet"/>
+    <link th:href="@{~/css/xadmin.css}"rel="stylesheet"/>
+    <script type="text/javascript" th:src="@{https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{~/lib/layui/layui.js}"></script>
+
+</head>
+<body class="layui-anim layui-anim-up">
+<div class="x-nav">
+          <span class="layui-breadcrumb">
+            <a href="">首页</a>
+            <a href="">分类管理</a>
+            <a>
+              <cite><span th:text="${type}==0?'需求管理':'资源管理'"/></cite></a>
+          </span>
+</div>
+<div class="x-body">
+    <xblock>
+        <a class="layui-btn" id="btn-add" href="javascript:;"><i class="layui-icon"></i>添加</a>
+        <!--<button class="layui-btn" onclick="x_admin_show('添加用户','./member-add.html',600,400)"><i class="layui-icon"></i>添加</button>-->
+        <span class="x-right" style="line-height:40px" th:text="'共有数据：'+${cateList.total}+'条'"></span>
+    </xblock>
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>分类名称</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="cate : ${cateList.list}">
+            <td><span th:text="${cate.id}"></span></td>
+            <td><span th:id="'title'+${cate.id}" th:text="${cate.name}"></span></td>
+            <td class="td-manage">
+                <a title="编辑" class="cate-edit" th:value="${cate.id}" href="javascript:;">
+                    <i class="layui-icon">&#xe642;</i>
+                </a>
+                <!--<a title="删除" th:value="${cate.id}" href="javascript:;">-->
+                    <!--<i class="layui-icon">&#xe640;</i>-->
+                <!--</a>-->
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
+    <div id="page">
+    </div>
+
+</div>
+<script th:inline="javascript">
+    layui.use('element', function(){
+        var element = layui.element;
+    });
+    layui.use('laypage', function() {
+        var laypage = layui.laypage;
+        //执行一个laypage实例
+        laypage.render({
+            elem: 'page' //分页容器的id
+            ,curr: [[${cateList.pageNum}]]
+            ,limit: [[${cateList.pageSize}]] //每页12条数据
+            ,count: [[${cateList.total}]]
+            ,skin: '#1E9FFF' //自定义选中色值
+            ,skip: true //开启跳页
+            ,jump: function(obj, first){
+                if(!first){
+                    location.href = "?type=[[${type}]]&page=" + obj.curr;
+                }
+            }
+        });
+    });
+
+    layui.use('layer', function(){
+        var layer = layui.layer;
+        $('.cate-edit').bind("click",function () {
+            var cateId = parseInt($(this).attr('value'));
+            layer.prompt({title:'输入分类名'},function(value, index, elem){
+                $.ajax({
+                    type: 'PUT',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json", //预期服务器返回的数据类型
+                    url: "/category/edit", //url
+                    data: JSON.stringify({id:cateId,name:value,type:[[${type}]]}),
+                    success: function(result){
+                        layer.close(index);
+                        if(result.code == 0) {
+                            $('#title'+cateId).text(value);
+                        }else {
+                            layer.msg('修改失败！');
+                        }
+                    },error: function() {
+                        layer.msg('修改失败！');
+                        layer.close(index);
+                    }
+                });
+            });
+        });
+        $('#btn-add').bind('click',function(){
+            layer.prompt({title:'输入分类名'},function(value, index, elem){
+                $.ajax({
+                    type: 'POST',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json", //预期服务器返回的数据类型
+                    url: "/category/add", //url
+                    data: JSON.stringify({name:value,type:[[${type}]]}),
+                    success: function(result){
+                        layer.close(index);
+                        if(result.code == 0) {
+                            location.replace(location.href);
+                        }else {
+                            layer.msg('添加失败！');
+                        }
+                    },error: function() {
+                        layer.msg('添加失败！');
+                        layer.close(index);
+                    }
+                });
+            });
+        });
+    });
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.team2.dao.sys.NoticeDao">
+    <resultMap id="BaseResultMap" type="com.team2.pojo.sys.Notice">
+    <id column="id" property="id" jdbcType="INTEGER"/>
+    <result column="title" property="title" jdbcType="VARCHAR"/>
+    <result column="content" property="content" jdbcType="VARCHAR"/>
+    <result column="status" property="status" jdbcType="INTEGER"/>
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    <result column="memo" property="memo" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    	id
+    	,title
+    	,content
+    	,status
+    	,create_time
+    	,update_time
+    	,memo
+    </sql>
+    <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_notice
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="delById" parameterType="java.lang.Long">
+        delete from sys_notice
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="save" parameterType="com.team2.pojo.sys.Notice" keyProperty="id" useGeneratedKeys="true">
+        insert into sys_notice ( title,content,status,memo)
+        values (#{title,jdbcType=VARCHAR},#{content,jdbcType=VARCHAR},
+        #{status,jdbcType=INTEGER},#{memo,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="editById" parameterType="com.team2.pojo.sys.Notice">
+        update sys_notice set  
+         title = #{title,jdbcType=VARCHAR} ,
+         content = #{content,jdbcType=VARCHAR} ,
+         status = #{status,jdbcType=INTEGER} ,
+         memo = #{memo,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <select id="list" resultMap="BaseResultMap" parameterType="com.team2.vo.sys.NoticeQuery">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_notice
+        <trim prefix="where" prefixOverrides="and|or">
+        </trim>
+        order by id desc
+    </select>
+
+    <select id="pagelist" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_notice limit  #{pageNum},#{pageSize};
+    </select>
+</mapper>

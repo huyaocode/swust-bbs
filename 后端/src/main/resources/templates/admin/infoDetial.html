@@ -1,0 +1,44 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<!–suppress ThymeleafVariablesResolveInspection –>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>详情</title>
+</head>
+<body>
+<div class="x-body">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">ID：</label>
+                <span th:text="${info.id}"></span>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">标题：</label>
+                <span th:text="${info.title}"></span>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">内容：</label>
+                <span th:text="${info.content}"></span>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态：</label>
+                <span th:text="${info.status}=='0'?'未解决':(${info.status}=='1'?'已解决':'封禁')"></span>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">创建时间：</label>
+                <span th:text="${info.createTime}"></span>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">上传者：</label>
+                <span th:text="${info.userNickName}"></span>
+        </div>
+    </form>
+</div>
+<script th:inline="javascript">
+    layui.use('form', function(){
+        var form = layui.form;
+    });
+</script>
+</body>
+</html>

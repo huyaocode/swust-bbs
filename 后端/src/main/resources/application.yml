@@ -1,0 +1,67 @@
+spring:
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  server:
+    tomcat:
+      uri-encoding: UTF-8
+
+  application:
+    name: ComeToMeWebapp
+  datasource:
+    driver-class-name:  com.mysql.jdbc.Driver
+    url: jdbc:mysql://150.109.58.92:3306/cometome?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+    username: team2
+    password: team2team2
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    filters: stat,wall,log4j
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+  jackson:
+    date-format:   yyyy-MM-dd HH:mm:ss
+    joda-date-time-format: yyyy-MM-dd HH:mm:ss
+
+  mvc:
+   servlet:
+      load-on-startup: 1
+
+mybatis:
+  mapper-locations: classpath:/mybatis-mappers/**/**/*.xml  
+  configuration:
+    mapUnderscoreToCamelCase: true
+    
+pagehelper:
+  dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
+files:
+  path: D:/ctm/portrait
+  picpath: D:/ctm/picture
+
+
+spring.thymeleaf:
+  mode: LEGACYHTML5
+  cache: false
+
+web:
+  upload-path: D:/bbs/
+token:
+  expire:
+    seconds: 86400
+server:
+  port: 8085
+  
+    

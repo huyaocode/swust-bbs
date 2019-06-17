@@ -1,0 +1,176 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<!–suppress ThymeleafVariablesResolveInspection –>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户列表</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <link th:href="@{~/css/font.css}"rel="stylesheet"/>
+    <link th:href="@{~/css/xadmin.css}"rel="stylesheet"/>
+    <script type="text/javascript" th:src="@{https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{~/lib/layui/layui.js}"></script>
+
+</head>
+<body class="layui-anim layui-anim-up">
+<div class="x-nav">
+          <span class="layui-breadcrumb">
+            <a href="">首页</a>
+            <a href="">信息管理</a>
+            <a>
+              <cite><span th:text="${type}=='0'?'需求信息列表':'资源信息列表'"/></cite></a>
+          </span>
+
+</div>
+<div class="x-body">
+    <div class="layui-row">
+
+        <form class="layui-form layui-col-md12 x-so" action="/admin/infoList">
+            <div class="layui-inline">
+                <!--<label class="layui-form-label">选择分类</label>-->
+                <select name="cateId" lay-verify="required">
+                    <option th:each="cate:${cateList}"  th:value="${cate.id}" th:text="${cate.name}"></option>
+                </select>
+            </div>
+            <input type="text" name="type" th:value="${type}" hidden />
+            <input type="text" name="title"  placeholder="请输入要搜索的内容" autocomplete="off" class="layui-input">
+            <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+
+        </form>
+    </div>
+    <xblock>
+        <a class="layui-btn" href="javascript:location.replace(location.href);"><i class="layui-icon">ဂ</i>刷新</a>
+        <!--<button class="layui-btn" onclick="x_admin_show('添加用户','./member-add.html',600,400)"><i class="layui-icon"></i>添加</button>-->
+        <span class="x-right" style="line-height:40px" th:text="'共有数据：'+${infoList.total}+'条'"></span>
+    </xblock>
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>标题</th>
+            <th>内容</th>
+            <th>图片</th>
+            <th>状态</th>
+            <th>所属分类</th>
+            <th>创建时间</th>
+            <th>失效时间</th>
+            <th>发布者</th>
+            <th>操作</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="info,infoStat : ${infoList.list}">
+            <td><span th:text="${info.id}"></span></td>
+            <td class="info_title" ><span th:text="${info.title}"></span></td>
+            <td class="info_content" ><a th:title="${info.content}"
+                                         href="javascript:;" th:text="${info.content}"></a></td>
+            <td><span th:if="${info.picture}==''">无</span>
+                <a th:if="${info.picture}!=''" class="imgs" href="javascript:;"
+                   th:value="${info.picture}">点击查看</a>
+            </td>
+            <td><span th:text="${info.status}=='0'?'未解决':(${info.status}=='1'?'已解决':'封禁')"></span></td>
+            <td><span th:text="${info.name}"></span></td>
+            <td><span th:text="${#dates.format(info.createTime, 'YYYY-MM-dd HH:mm')}"></span></td>
+            <td><span th:text="${endTimeList[infoStat.index]}"></span></td>
+            <td><span th:text="${info.userNickName}"></span></td>
+            <td class="td-status">
+                    <span th:class="'layui-btn layui-btn-mini btn-ban '
+                    + (${info.status}=='2'?'layui-btn-disabled':'layui-btn-danger')"
+                          th:value="${info.id}" th:text="${info.status} == '2'?'已封禁':'封禁'"></span>
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
+    <div id="page">
+    </div>
+
+</div>
+<script th:inline="javascript">
+    layui.use('element', function(){
+        var element = layui.element;
+    });
+    layui.use('laypage', function() {
+        var laypage = layui.laypage;
+        //执行一个laypage实例
+        laypage.render({
+            elem: 'page' //分页容器的id
+            ,curr: [[${infoList.pageNum}]]
+            ,limit: [[${infoList.pageSize}]]
+            ,count: [[${infoList.total}]]
+            ,skin: '#1E9FFF' //自定义选中色值
+            ,skip: true //开启跳页
+            ,jump: function(obj, first){
+                if(!first){
+                    location.href = "?type=[[${type}]]&page=" + obj.curr;
+                }
+            }
+        });
+    });
+    layui.use('layer', function(){
+        var layer = layui.layer;
+        $('.btn-ban').bind("click",function () {
+            var infoId = parseInt($(this).attr('value'));
+            var btn = $(this);
+            if($(this).text() == '封禁'){
+                layer.confirm('确定要封禁吗？', function (index) {
+                    layer.close(index);
+                    var loadFlag = layer.load(1,{shade:[0.3]});
+                    $.ajax({
+                        type: 'PUT',
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json", //预期服务器返回的数据类型
+                        url: "/information/setBanned", //url
+                        data: JSON.stringify({id:infoId}),
+                        success: function(result){
+                            layer.close(loadFlag);
+                            if(result.code == 0){
+                                btn.addClass('layui-btn-disabled');
+                                btn.removeClass('layui-btn-danger');
+                                btn.text('已封禁');
+                            }else{
+                                layer.msg('封禁失败！');
+                            }
+                        },
+                        error: function () {
+                            layer.msg('封禁失败！');
+                            layer.close(loadFlag);
+                        }
+                    });
+                });
+            }
+        });
+
+        $('.imgs').bind("click",function () {
+            var imgs = $(this).attr('value').split('|');
+            var imgsData = [];
+            for(var i = 0; i<imgs.length; i++){
+                imgsData.push({
+                    "alt": i+"",
+                    "pid": i,
+                    "src": imgs[i],
+                    "thumb": ""
+                });
+            }
+            var photos ={
+                "title": "",
+                "id":0,
+                "start":0,
+                "data":imgsData
+            };
+            layer.photos({
+                photos: photos
+                ,anim: 5
+            });
+        });
+    });
+
+    layui.use('form', function(){
+        var form = layui.form;
+    });
+
+</script>
+</body>
+</html>

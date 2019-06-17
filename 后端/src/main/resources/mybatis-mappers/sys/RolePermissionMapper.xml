@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="comteam2.dao.sys.RolePermissionDao">
+    <resultMap id="BaseResultMap" type="com.team2.pojo.sys.RolePermission">
+    <id column="role_id" property="roleId" jdbcType="INTEGER"/>
+    <result column="permission_id" property="permissionId" jdbcType="INTEGER"/>
+    <result column="parent_id" property="parentId" jdbcType="INTEGER"/>
+    <result column="name" property="name" jdbcType="VARCHAR"/>
+    <result column="permission" property="permission" jdbcType="VARCHAR"/>
+    <result column="sort" property="sort" jdbcType="INTEGER"/>
+    <result column="route" property="route" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    	rp.role_id,rp.permission_id,p.parent_id,p.name,p.permission,p.sort,p.route
+    </sql>
+    <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_role_permission 
+        and role_id = #{roleId,jdbcType=INTEGER}
+    </select>
+    <select id="listByRoleId" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_role_permission rp join on sys_permission p
+        where rp.permission_id=p.id 
+        and rp.role_id = #{roleId,jdbcType=INTEGER}
+    </select>
+    
+    <delete id="delById" parameterType="java.lang.Long">
+        delete from sys_role_permission
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="save" parameterType="com.team2.pojo.sys.RolePermission" keyProperty="id" useGeneratedKeys="true">
+        insert into sys_role_permission ( permission_id
+        )
+        values ( #{permissionId,jdbcType=INTEGER}
+        )
+    </insert>
+
+    <update id="editById" parameterType="com.team2.pojo.sys.RolePermission">
+        update sys_role_permission set  role_id = #{roleId
+        ,jdbcType=INTEGER}
+     ,permission_id = #{permissionId,jdbcType=INTEGER}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    
+    
+
+    <select id="list" resultMap="BaseResultMap" parameterType="com.team2.vo.sys.RolePermissionQuery">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_role_permission
+        <trim prefix="where" prefixOverrides="and|or">
+        </trim>
+        order by id desc
+    </select>
+
+    <select id="pagelist" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_role_permission limit  #{pageNum},#{pageSize};
+    </select>
+</mapper>
