@@ -7,7 +7,10 @@
     >
       <el-card class="box-card">
         <router-link :to="'/detail/' + item.id">
-          <div class="img" v-if="item.picture">
+          <div
+            class="img"
+            v-if="item.picture"
+          >
             <el-image
               style="width: 100px; height: 100px"
               :src="(item.picture).split('----')[0]"
@@ -18,7 +21,10 @@
         </router-link>
         <div class="content">
           <router-link :to="'/detail/' + item.id">
-            <h3>{{item.title }}</h3>
+            <div style="display: flex; justify-content: space-between;">
+              <h3>{{item.title }}</h3>
+              <h4 style="font-style: italic; font-weight: 200;">{{getCategory(item.categoryId, item.type)}}</h4>
+            </div>
           </router-link>
           <p>
             {{item.content }}
@@ -34,7 +40,22 @@ import { constants } from 'crypto';
 
 export default {
   name: 'list',
-  props: ['data']
+  props: ['data'],
+  methods: {
+    getCategory (categoryId, type) {
+      let categoryList = null;
+      if (type === '0') {
+        categoryList = JSON.parse(localStorage.getItem('requireCategory'))
+      } else {
+        categoryList = JSON.parse(localStorage.getItem('resourceCategory'))
+      }
+      for (let i in categoryList) {
+        if (categoryList[i].id === parseInt(categoryId)) {
+          return categoryList[i].name;
+        }
+      }
+    }
+  },
 }
 </script>
 

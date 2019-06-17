@@ -111,7 +111,6 @@ export default {
       this.loading = true;
       const data = this.data;
       const sendData = {
-        "categoryId": 1,
         "pageNum": this.pageNum + 1,
         "pageSize": this.pageSize,
         "type": "0" // 0代表需求
